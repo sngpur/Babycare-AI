@@ -1,0 +1,46 @@
+name: Build Android APK
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Extract and Organize Project Files
+        run: |
+          unzip Project.zip
+          if [ -d */app ]; then
+            mv */* . 2>/dev/null || true
+            mv */.* . 2>/dev/null || true
+          fi
+          mkdir -p .github/gradle_home
+          
+          # Recreate signature files
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p app
+          keytool -genkey -v -keystore app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          
+          chmod -R 777 .
+
+      - name: Build APK without Cache Conflict
+        env:
+          GRADLE_USER_HOME: ${{ github.workspace }}/.github/gradle_home
+        run: |
+          gradle wrapper --gradle-version 9.3.1
+          ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache
+
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-apk
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            **/build/outputs/apk/debug/*.apk
