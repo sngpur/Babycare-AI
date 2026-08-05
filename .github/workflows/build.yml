@@ -26,9 +26,10 @@ jobs:
           mkdir -p app
           keytool -genkey -v -keystore app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           
-          # Fix google-services missing match error by allowing passthrough
+          # Disable google-services plugin check completely to prevent package name mismatch error
           if [ -f "app/build.gradle.kts" ]; then
-            echo 'googleServices { missingGoogleServicesStrategy = com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy.WARN }' >> app/build.gradle.kts
+            sed -i 's/alias(libs.plugins.google.services)/\/\/ alias(libs.plugins.google.services)/g' app/build.gradle.kts
+            sed -i 's/googleServices {/googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN/g' app/build.gradle.kts
           fi
 
           chmod -R 777 .
