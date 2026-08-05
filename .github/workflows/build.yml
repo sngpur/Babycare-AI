@@ -17,7 +17,7 @@ jobs:
       - name: Extract and Organize Project Files
         run: |
           unzip Project.zip
-          # Zip ke andar ke subfolder se saari files ko bahar root directory me move karna
+          # Agar zip ke andar folder hai toh files ko bahar layein
           find . -maxdepth 2 -type d ! -name '.' ! -name '.github' -exec cp -r {}/. . \; 2>/dev/null || true
           
           mkdir -p .github/gradle_home
@@ -29,10 +29,12 @@ jobs:
           
           chmod -R 777 .
 
-      - name: Build APK without Cache Conflict
+      - name: Generate Gradle Wrapper & Build APK
         env:
-          GRADLE_USER_HOME: ${{ github.workspace }}/.github/gradle_home
+          GRADLE_USER_HOME: ${{ github.workspace }}.github/gradle_home
         run: |
+          # Agar gradlew missing hai toh server khud wrapper generate kar lega
+          gradle wrapper --gradle-version 8.5
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache
 
