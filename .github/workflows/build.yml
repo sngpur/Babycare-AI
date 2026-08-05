@@ -17,8 +17,7 @@ jobs:
       - name: Extract and Organize Project Files
         run: |
           unzip Project.zip
-          # Agar zip ke andar folder hai toh files ko bahar layein
-          find . -maxdepth 2 -type d ! -name '.' ! -name '.github' -exec cp -r {}/. . \; 2>/dev/null || true
+          find . -maxdepth 2 ! -name '.' ! -name '.github' -exec cp -r {}/. . \; 2>/dev/null || true
           
           mkdir -p .github/gradle_home
           
@@ -31,17 +30,17 @@ jobs:
 
       - name: Generate Gradle Wrapper & Build APK
         env:
-          GRADLE_USER_HOME: ${{ github.workspace }}.github/gradle_home
+          GRADLE_USER_HOME: ${{ github.workspace }}/.github/gradle_home
         run: |
-          # Agar gradlew missing hai toh server khud wrapper generate kar lega
-          gradle wrapper --gradle-version 8.5
+          # Android Gradle Plugin 9.1.1 ke liye Gradle 9.3.1 zaroori hai
+          gradle wrapper --gradle-version 9.3.1
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache
 
       - name: Upload Finished APK
         uses: actions/upload-artifact@v4
         with:
-          name: my-app-apk
+          name: my-market-apk
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             **/build/outputs/apk/debug/*.apk
