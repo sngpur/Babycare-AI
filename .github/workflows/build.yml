@@ -26,13 +26,17 @@ jobs:
           mkdir -p app
           keytool -genkey -v -keystore app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           
+          # Fix google-services missing match error by allowing passthrough
+          if [ -f "app/build.gradle.kts" ]; then
+            echo 'googleServices { missingGoogleServicesStrategy = com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy.WARN }' >> app/build.gradle.kts
+          fi
+
           chmod -R 777 .
 
       - name: Generate Gradle Wrapper & Build APK
         env:
           GRADLE_USER_HOME: ${{ github.workspace }}/.github/gradle_home
         run: |
-          # Android Gradle Plugin 9.1.1 ke liye Gradle 9.3.1 zaroori hai
           gradle wrapper --gradle-version 9.3.1
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache
