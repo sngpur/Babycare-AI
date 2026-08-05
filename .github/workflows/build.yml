@@ -26,10 +26,10 @@ jobs:
           mkdir -p app
           keytool -genkey -v -keystore app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           
-          # Cleanly remove old googleServices block and add safe configuration to app/build.gradle.kts
+          # Completely remove google-services plugin from app/build.gradle.kts to bypass package check
           if [ -f "app/build.gradle.kts" ]; then
+            sed -i '/google.services/d' app/build.gradle.kts
             sed -i '/googleServices {/,/}/d' app/build.gradle.kts
-            echo 'googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }' >> app/build.gradle.kts
           fi
 
           chmod -R 777 .
