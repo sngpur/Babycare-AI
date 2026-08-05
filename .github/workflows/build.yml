@@ -17,10 +17,13 @@ jobs:
       - name: Extract and Organize Project Files
         run: |
           unzip Project.zip
-          if [ -d */app ]; then
-            mv */* . 2>/dev/null || true
-            mv */.* . 2>/dev/null || true
+          # Agar zip ke andar koi folder hai toh uske andar ki saari files ko root me layein
+          EXTRACTED_DIR=$(ls -d */ | grep -v "github" | head -n 1)
+          if [ -d "$EXTRACTED_DIR" ]; then
+            cp -r "$EXTRACTED_DIR"* .
+            cp -r "$EXTRACTED_DIR".* . 2>/dev/null || true
           fi
+          
           mkdir -p .github/gradle_home
           
           # Recreate signature files
