@@ -17,12 +17,8 @@ jobs:
       - name: Extract and Organize Project Files
         run: |
           unzip Project.zip
-          # Agar zip ke andar koi folder hai toh uske andar ki saari files ko root me layein
-          EXTRACTED_DIR=$(ls -d */ | grep -v "github" | head -n 1)
-          if [ -d "$EXTRACTED_DIR" ]; then
-            cp -r "$EXTRACTED_DIR"* .
-            cp -r "$EXTRACTED_DIR".* . 2>/dev/null || true
-          fi
+          # Zip ke andar ke subfolder se saari files ko bahar root directory me move karna
+          find . -maxdepth 2 -type d ! -name '.' ! -name '.github' -exec cp -r {}/. . \; 2>/dev/null || true
           
           mkdir -p .github/gradle_home
           
