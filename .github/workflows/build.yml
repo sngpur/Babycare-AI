@@ -34,6 +34,7 @@ jobs:
         env:
           GRADLE_USER_HOME: ${{ github.workspace }}/.github/gradle_home
         run: |
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --no-build-cache --no-configuration-cache
 
       - name: Upload Finished APK
